@@ -5,7 +5,7 @@ Small script to download and bundle XML files for OpenSeaMap.
 To build the image locally from git run:
 
 ```
- docker build -t OpenSeaMap/BundleCompressor .
+ docker build -t openseamap/chart-bundles-compressor .
 ```
 
 # Run
@@ -15,5 +15,5 @@ and put the output data into `/dataOut`. Mount these volumes in order to get the
 
 
 ```
-docker run -it --rm -v /path/for/out/data:/dataOut -v /path/for/tmp/data:/dataTmp OpenSeaMap/BundleCompressor
+docker run -it --rm -v /path/for/out/data:/dataOut -v /path/for/tmp/data:/dataTmp openseamap/chart-bundles-compressor
 ```
