@@ -17,7 +17,7 @@ let callback = (err, filelist) => {
 }
 
 let config = {
-  localPath: './out/', // local path for files to parse
+  localPath: './out', // local path for files to parse
   outputPath: './out', // path for the detail files to be written
   properties: [
     'name',
@@ -130,7 +130,7 @@ module.exports = (configParams, fileList, callbackFunc) => {
             return
           }
           const feature = handleBundle(bundle)
-          const outName = config.outputPath + feature.overview.properties.path + '.geojson'
+          const outName = config.outputPath + '/' + feature.overview.properties.path + '.geojson'
           fs.writeFile(
             outName,
             JSON.stringify(feature.details),

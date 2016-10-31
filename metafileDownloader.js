@@ -22,7 +22,7 @@ let config = {
   host: 'localhost', // the ftp host
   remotePath: '/', // the path on the ftp server
   filterExtension: '.xml', // file extension of the files to download
-  downloadPath: './out/' // local path for downloaded files
+  downloadPath: './out' // local path for downloaded files
 }
 
 c.on('ready', function () {
