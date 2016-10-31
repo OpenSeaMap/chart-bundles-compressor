@@ -1,0 +1,25 @@
+{
+  "name": "chart-bundles-compressor",
+  "version": "0.0.0",
+  "description": "Small helper to compress all chart-bundles",
+  "repository": "https://github.com/OpenSeaMap/chart-bundles-compressor",
+  "main": "index.js",
+  "scripts": {
+    "start": "node .",
+    "lint": "eslint **/*.js"
+  },
+  "author": "Axel Utech <axel@brasshack.de>",
+  "license": "MIT",
+  "dependencies": {
+    "async": "^2.1.2",
+    "ftp": "^0.3.10",
+    "mkdirp": "^0.5.1",
+    "xml2js": "^0.4.17"
+  },
+  "devDependencies": {
+    "eslint": "^3.9.0",
+    "eslint-config-standard": "^6.2.1",
+    "eslint-plugin-promise": "^3.3.0",
+    "eslint-plugin-standard": "^2.0.1"
+  }
+}
