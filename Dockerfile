@@ -11,4 +11,8 @@ RUN npm install
 # Bundle app source
 COPY . /usr/src/app
 
-CMD [ "npm", "start" ]
+VOLUME /download
+VOLUME /metafiles
+VOLUME /out
+
+ENTRYPOINT ["node", ".", "--downloadPath", "/download", "--metafilePath", "/metafiles", "--outputPath", "/out"]
