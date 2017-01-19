@@ -53,7 +53,7 @@ const getGeometryFromMapTags = (mapTags) => {
     eMax = Math.max(eMax, e)
     wMax = Math.min(wMax, w)
     polygonsCoords.push([[
-      [e, n], [w, n], [w, s], [e, s], [e, n]
+      [e, n], [e, s], [w, s], [w, n], [e, n]
     ]])
   }
   let geometries = {
