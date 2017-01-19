@@ -77,7 +77,8 @@ const handleBundle = (metadata, bundle) => {
   properties.downloadUrl = metadata.config.protocol +
       metadata.config.host +
       metadata.config.remotePath +
-      metadata.ftpData.name
+      bundle.$.path +
+      '.7z'
   properties.date = metadata.ftpData.date
 
   const geometry = getGeometryFromMapTags(bundle.map)
