@@ -6,7 +6,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node .",
-    "lint": "eslint **/*.js"
+    "lint": "eslint **/*.js",
+    "serve":"node serve.js"
   },
   "author": "Axel Utech <axel@brasshack.de>",
   "license": "MIT",
@@ -18,9 +19,11 @@
     "xml2js": "^0.4.17"
   },
   "devDependencies": {
+    "cors": "^2.8.4",
     "eslint": "^3.9.0",
     "eslint-config-standard": "^6.2.1",
     "eslint-plugin-promise": "^3.3.0",
-    "eslint-plugin-standard": "^2.0.1"
+    "eslint-plugin-standard": "^2.0.1",
+    "express": "^4.16.2"
   }
 }
