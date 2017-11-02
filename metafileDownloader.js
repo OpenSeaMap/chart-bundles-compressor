@@ -23,7 +23,7 @@ let config = {
   protocol: 'ftp://',
   host: 'localhost', // the ftp host
   remotePath: '/', // the path on the ftp server
-  filterExtension: '.xml', // file extension of the files to download
+  filterExtension: '.json', // file extension of the files to download
   downloadPath: './download', // local path for downloaded files
   metafilePath: './meta' // local path to write meta data for files
 }

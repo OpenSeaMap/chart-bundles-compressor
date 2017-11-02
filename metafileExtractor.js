@@ -6,8 +6,7 @@
 
 const async = require('async')
 const fs = require('fs')
-const xml2js = require('xml2js')
-// const util = require('util')
+const util = require('util')
 const mkdirp = require('mkdirp')
 
 // default callback handler
@@ -24,11 +23,16 @@ let config = {
     'format',
     'path',
     'app'
-  ]
+  ],
+  defaultProperties: {
+    'format': 'KAP',
+    'app': 'OpenCPN',
+    'app:url': 'http://opencpn.org/ocpn/'
+  }
 }
 
 const getMatchingProps = (object, propsToMatch) => {
-  let props = {}
+  let props = config.defaultProperties
   for (let prop in object) {
     if (!object.hasOwnProperty(prop)) continue
     if (!(propsToMatch.indexOf(prop) > -1)) continue
@@ -37,55 +41,22 @@ const getMatchingProps = (object, propsToMatch) => {
   return props
 }
 
-const getGeometryFromMapTags = (mapTags) => {
-  let polygonsCoords = []
-  let nMax = -180
-  let sMax = 180
-  let eMax = -180
-  let wMax = 180
-  for (const map of mapTags) {
-    const n = Number(map.$.north)
-    const s = Number(map.$.south)
-    const e = Number(map.$.east)
-    const w = Number(map.$.west)
-    nMax = Math.max(nMax, n)
-    sMax = Math.min(sMax, s)
-    eMax = Math.max(eMax, e)
-    wMax = Math.min(wMax, w)
-    polygonsCoords.push([[
-      [e, n], [e, s], [w, s], [w, n], [e, n]
-    ]])
-  }
-  let geometries = {
-    'type': 'MultiPolygon',
-    'coordinates': polygonsCoords
-  }
-  return {
-    geometries: geometries,
-    bbox: {
-      west: wMax,
-      south: sMax,
-      east: eMax,
-      north: nMax
-    }
-  }
-}
-
 const handleBundle = (metadata, bundle) => {
   // console.log(util.inspect(bundle, false, null))
-  let properties = getMatchingProps(bundle.$, config.properties)
+  // console.log(util.inspect(metadata, false, null))
+  let properties = getMatchingProps(bundle.properties, config.properties)
+  properties.fileName = metadata.ftpData.name.substr(0, metadata.ftpData.name.length - metadata.config.filterExtension.length) +
+    '.7z'
   properties.downloadUrl = metadata.config.protocol +
       metadata.config.host +
       metadata.config.remotePath +
-      bundle.$.path +
-      '.7z'
+      properties.fileName
   properties.date = metadata.ftpData.date
 
-  const geometry = getGeometryFromMapTags(bundle.map)
-  const n = geometry.bbox.north
-  const s = geometry.bbox.south
-  const e = geometry.bbox.east
-  const w = geometry.bbox.west
+  const n = bundle.bbox[3]
+  const s = bundle.bbox[1]
+  const e = bundle.bbox[0]
+  const w = bundle.bbox[2]
   const featureOverview = {
     type: 'Feature',
     geometry: {
@@ -98,7 +69,7 @@ const handleBundle = (metadata, bundle) => {
   }
   const featureDetails = {
     type: 'Feature',
-    geometry: geometry.geometries,
+    geometry: bundle.geometries,
     properties: properties
   }
   return {
@@ -108,27 +79,17 @@ const handleBundle = (metadata, bundle) => {
 }
 
 const handleXmlBundleFile = (config, metadata, callback) => {
-  const parser = new xml2js.Parser()
   const filename = metadata.dataFile // absolut file to data file
   fs.readFile(filename, (err, data) => {
     if (err) {
       callback(err)
       return
     }
-    parser.parseString(data, (err, result) => {
-      if (err) {
-        callback(err)
-        return
-      }
-      const bundle = result.bundle
-      if (!bundle) {
-        console.error(`File "${filename}" contains no <bundle> tag.`)
-        callback()
-        return
-      }
-      const feature = handleBundle(metadata, bundle)
-      const outName = config.outputPath + '/' + feature.overview.properties.path + '.geojson'
-      fs.writeFile(
+
+    const fileData = JSON.parse(data)
+    const feature = handleBundle(metadata, fileData)
+    const outName = config.outputPath + '/' + feature.overview.properties.fileName + '.geojson'
+    fs.writeFile(
         outName,
         JSON.stringify(feature.details),
         (err) => {
@@ -141,7 +102,6 @@ const handleXmlBundleFile = (config, metadata, callback) => {
           callback(null, feature.overview)
         }
       )
-    })
   })
 }
 
@@ -154,8 +114,7 @@ module.exports = (configParams, callbackFunc) => {
   const fileList = fs.readdirSync(config.metafilePath)
   console.log(`Going to parse ${fileList.length} files.`)
 
-  let features = []
-  async.forEach(
+  async.mapSeries(
     fileList,
     (filename, callback) => {
       fs.readFile(config.metafilePath + '/' + filename, (err, data) => {
@@ -169,12 +128,12 @@ module.exports = (configParams, callbackFunc) => {
             callback(err)
             return
           }
-          features.push(feature)
-          callback()
+          // callback with deep copy as the original contents change later on (why?)
+          callback(null, JSON.parse(JSON.stringify(feature)))
         })
       })
     },
-    (err) => {
+    (err, features) => {
       if (err) {
         callback(err)
         return
@@ -184,6 +143,7 @@ module.exports = (configParams, callbackFunc) => {
         type: 'FeatureCollection',
         features: features
       }
+      console.log(util.inspect(featureCollection, false, null))
       const overviewName = config.outputPath + '/overview.geojson'
       fs.writeFile(overviewName, JSON.stringify(featureCollection), (err) => {
         console.log(`wrote overview file to "${overviewName}"`)
